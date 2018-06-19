@@ -1,0 +1,7 @@
+---
+# tasks file for batman
+  - name: Role de instalacao do apache
+    hosts: all
+
+    tasks:
+      - include: prerequisitos.yml

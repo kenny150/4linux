@@ -1,0 +1,8 @@
+ - name: Instalando o Puppet - Ubuntu
+    command: dpkg -i /root/puppet5-release-xenial.deb
+
+  - name: Instalando Puppet-Agent
+    apt:
+      name: puppet-agent
+      state: present
+      update_cache: yes

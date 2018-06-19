@@ -1,0 +1,8 @@
+- name: Role para instalar o PUPPET 
+  hosts: all
+  tasks:
+  - include: prerequisitos.yml
+  - include: install_ubuntu.yml
+    when: ansible_distribution == "Ubuntu"
+  - include: install_centos.yml
+    when: ansible_distribution == "CentOS"

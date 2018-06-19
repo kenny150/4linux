@@ -1,0 +1,91 @@
+---
+- name: Playbook de Testes
+  hosts: devops docker automation
+  tasks:
+
+  - name: Verificando memoria
+    command: free -h
+
+  - name: Instalando o sl
+    apt: name=sl state=absent update_cache=yes
+    when: ansible_distribution == "Ubuntu"
+    
+  - name: Removendo NGINX do Ubuntu
+    apt: 
+      name: "nginx"
+      state: absent
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Removendo NGINX do CentOS
+    yum: name=nginx state=absent
+    when: ansible_distribution == "CentOS"
+
+  - name: Instalando pacotes - UBUNTU
+    apt:
+      name: "{{ item }}"
+      state: present
+      update_cache: yes
+    with_items:
+    - "cowsay"
+    - "apache2"
+    - "libapache2-mod-php7.0"
+    - "php7.0"
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Instalando pacotes - CENTOS
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items:
+    - "epel-release"
+    - "httpd"
+    - "php"
+    notify: httpd
+    when: ansible_distribution == "CentOS"
+
+  - name: Habilitando modulo
+    command: a2enmod php7.0
+    notify: restart
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Criando arquivo web
+    command: touch /var/www/html/index.php && echo '<?php echo "Desafio Completo"?>' >> /var/www/html/index.php
+
+  - name: Gerando path do root
+    lineinfile:
+      path: /etc/profile
+      line: "export PATH:$PATH:/usr/games"
+      state: present
+
+  - name: Garantindo o hosts
+    lineinfile:
+      path: /etc/hosts
+      create: yes
+      line: "{{ item }}"
+    with_items:
+    - "192.168.99.10 devops.salas4linux.com.br devops"
+    - "192.168.99.20 docker.salas4linux.com.br docker"
+    - "192.168.99.30 automation.salas4linux.com.br automation"
+
+  - name: Adicionando um usuario
+    user:
+      name: "{{ username }}"
+      shell: /bin/bash
+      create_home: yes
+
+  - name: Enviando arquivo
+    copy:
+      src: arquivo
+      dest: /tmp/arquivo
+  
+  handlers:
+  - name: restart
+    service:
+      name: apache2
+      state: restarted
+
+  - name: httpd
+    service:
+      name: httpd
+      state: restarted
+
